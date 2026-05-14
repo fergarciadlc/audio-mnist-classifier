@@ -1,0 +1,13 @@
+# Runtime dependencies for the AudioMNIST pipeline.
+# PyTorch is installed in the Dockerfile (CPU vs CUDA index choice happens there).
+torch>=2.2
+numpy>=1.26
+librosa>=0.10
+soundfile>=0.12
+PyYAML>=6.0
+tqdm>=4.66
+scikit-learn>=1.4
+scipy>=1.11
+matplotlib>=3.8
+mlflow>=2.13
+torchinfo>=1.8

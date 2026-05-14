@@ -1,0 +1,44 @@
+experiment:
+  name: cnn_classifier_v1
+  description: "Spectrogram CNN baseline on AudioMNIST — 10-class digit classification"
+  mlflow_experiment: audio-mnist-baselines
+  tags:
+    task: multiclass_classification
+    strategy: from_scratch
+
+dataset: configs/datasets/AudioMNIST.yaml
+features: configs/features/mel_16k_64.yaml
+model: configs/models/cnn_classifier_v1.yaml
+
+training:
+  epochs: 30
+  batch_size: 64
+  learning_rate: 0.001
+  optimizer: adam
+  seed: 123
+
+  # PyTorch DataLoader workers per split.
+  num_workers: 4
+
+  callbacks:
+    early_stopping:
+      monitor: val_accuracy
+      mode: max
+      patience: 8
+    reduce_lr:
+      monitor: val_loss
+      mode: min
+      factor: 0.5
+      patience: 3
+
+evaluation:
+  metrics:
+    - accuracy
+    - macro_f1
+    - weighted_f1
+    - macro_precision
+    - macro_recall
+  plots:
+    - confusion_matrix
+    - per_class_accuracy
+    - per_speaker_accuracy

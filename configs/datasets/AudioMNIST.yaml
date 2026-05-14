@@ -1,0 +1,24 @@
+dataset:
+  name: AudioMNIST
+  type: classification
+  description: >
+    AudioMNIST — 30,000 spoken-digit recordings (0–9) from 60 speakers.
+    Files are organized as data/audio-mnist/{speaker:02d}/{digit}_{speaker}_{utt}.wav.
+    Each clip is mono ~0.5–0.8s. Speaker IDs and digit class are encoded in the filename.
+
+  # Root folder containing speaker subdirectories (01..60).
+  path: data/audio-mnist
+  format: wav
+
+  num_classes: 10
+  class_names: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+  # null = use all files. Set to a small integer (e.g. 50 per speaker) via
+  # `--limit` in prepare_data for a quick smoke test without editing this file.
+  limit: null
+
+  split:
+    # Speaker-disjoint: whole speakers held out so eval generalizes to new voices.
+    strategy: speaker_disjoint
+    ratios: [0.8, 0.1, 0.1]   # train/val/test fractions of the 60 speakers
+    seed: 42

@@ -1,0 +1,32 @@
+features:
+  name: mel_16k_64
+  type: mel_spectrogram_db
+
+  audio:
+    sample_rate: 16000
+    mono: true
+    # No HF cut (mel filterbank already controls the band via fmax).
+    hf_cut_hz: null
+    # AudioMNIST clips are sub-second; we pad/truncate every file to this length
+    # so spectrograms have a deterministic n_frames.
+    fixed_duration_sec: 1.0
+
+  stft:
+    n_fft: 512
+    win_length: 400          # 25 ms
+    hop_length: 160          # 10 ms  -> ~100 frames per 1.0 s
+
+  mel:
+    n_mels: 64
+    fmin: 20
+    fmax: 8000               # ≤ sample_rate/2
+    power: 2.0
+
+  normalization:
+    # Mean/std computed from log-mel of clean speech ~16 kHz; tweak after EDA.
+    strategy: fixed
+    mean: -40.0
+    std: 20.0
+
+  storage: full
+  output_format: npy

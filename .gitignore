@@ -1,0 +1,72 @@
+# Misc
+**.excalidraw
+.cursor
+.claude
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+.pixi
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Output data
+outputs/
+*.jsonl
+*.csv
+
+# Logs
+*.log
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE configs
+.vscode/
+.idea/
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
+
+# API keys / environment files
+.env.local
+.env.*
+.envrc
+
+# Pipeline data & artifacts (large / generated)
+data/
+artifacts/
+mlruns/
+
+# Temporary files
+tmp/
+temp/
+
+# Ruff and pytest artifacts
+.cache/
+ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.nox/
+.testmondata

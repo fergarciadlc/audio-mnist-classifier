@@ -1,0 +1,27 @@
+model:
+  name: cnn_classifier_v1
+  type: spectrogram_cnn
+  description: "Spectrogram CNN — Audio MNIST 10-class classifier"
+  tags:
+    task: multiclass_classification
+    architecture: spectrogram_cnn
+    model: cnn_classifier_v1
+
+  backbone:
+    filters:  [32, 64, 128, 256]
+    kernels:  3          # scalar = same for all layers
+    strides:  2
+    padding:  same
+    activation: relu
+    batch_norm: true
+    dropout: 0.3         # per-block spatial dropout, 0 to disable
+    pooling: adaptive_avg
+
+  head:
+    units: 128
+    activation: relu
+    dropout: 0.3
+
+  output:
+    num_classes: 10       # null for regression
+    loss: cross_entropy

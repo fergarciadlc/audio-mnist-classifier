@@ -1,0 +1,56 @@
+[workspace]
+name = "audio-mnist"
+description = "MLOps pipeline for AudioMNIST 10-class digit classification."
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+# Common deps for every environment. PyTorch is split into features below so
+# we can pick the MPS/CPU build on Mac and the CUDA build on the Linux server.
+[dependencies]
+python = "3.11.*"
+pip = "*"
+numpy = ">=1.26"
+scipy = ">=1.11"
+scikit-learn = ">=1.4"
+matplotlib = ">=3.8"
+pyyaml = ">=6.0"
+tqdm = ">=4.66"
+librosa = ">=0.10"
+pysoundfile = ">=0.12"
+ffmpeg = "*"
+mlflow = ">=2.13"
+torchinfo = ">=1.8"
+
+# ── CPU / Apple-Silicon (MPS) build, default for Mac dev ───────────────────────
+[feature.cpu.dependencies]
+pytorch = ">=2.2"
+
+# ── CUDA build, for the Linux server ──────────────────────────────────────────
+[feature.gpu]
+platforms = ["linux-64"]
+
+[feature.gpu.system-requirements]
+cuda = "12"
+
+[feature.gpu.dependencies]
+pytorch-gpu = ">=2.2"
+
+# ── Environments ──────────────────────────────────────────────────────────────
+# `default` (pixi run …) is CPU/MPS — fine for Mac dev.
+# `gpu`     (pixi run -e gpu …) is CUDA on linux-64 only.
+[environments]
+default = { features = ["cpu"], solve-group = "default" }
+gpu = { features = ["gpu"], solve-group = "gpu" }
+
+# ── Tasks ─────────────────────────────────────────────────────────────────────
+# `pixi run gpu-check` reports torch device availability.
+# The Makefile drives the pipeline stages so we don't duplicate them here, but
+# you can also invoke them directly:  pixi run python -m pipelines.train --config ...
+[tasks]
+gpu-check = """\
+python -c "import torch; \
+print('torch          =', torch.__version__); \
+print('cuda_available =', torch.cuda.is_available()); \
+print('mps_available =', getattr(torch.backends, 'mps', None) and torch.backends.mps.is_available()); \
+print('device_count   =', torch.cuda.device_count())"\
+"""
