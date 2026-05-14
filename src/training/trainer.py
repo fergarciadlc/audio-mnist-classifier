@@ -20,6 +20,7 @@ import torch
 import torch.nn as nn
 import yaml
 from torch.optim import Optimizer
+from tqdm import tqdm
 
 from src.config import ExperimentConfig
 from src.mlflow_logger import MLflowLogger, resolve_mlflow_experiment_name
@@ -62,12 +63,15 @@ def _train_one_epoch(
     optimizer: Optimizer,
     criterion: nn.Module,
     device: torch.device,
+    epoch: int,
+    total_epochs: int,
 ) -> tuple[float, float]:
     model.train()
     total_loss = 0.0
     total_correct = 0
     total_count = 0
-    for x, y in loader:
+    pbar = tqdm(loader, desc=f"epoch {epoch}/{total_epochs} train", leave=False)
+    for x, y in pbar:
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
 
@@ -81,6 +85,7 @@ def _train_one_epoch(
         total_loss += loss.item() * batch_n
         total_correct += (logits.argmax(dim=1) == y).sum().item()
         total_count += batch_n
+        pbar.set_postfix(loss=total_loss / total_count, acc=total_correct / total_count)
 
     return total_loss / max(total_count, 1), total_correct / max(total_count, 1)
 
@@ -91,12 +96,15 @@ def _validate(
     loader,
     criterion: nn.Module,
     device: torch.device,
+    epoch: int,
+    total_epochs: int,
 ) -> tuple[float, float]:
     model.eval()
     total_loss = 0.0
     total_correct = 0
     total_count = 0
-    for x, y in loader:
+    pbar = tqdm(loader, desc=f"epoch {epoch}/{total_epochs} val  ", leave=False)
+    for x, y in pbar:
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
         logits = model(x)
@@ -105,6 +113,7 @@ def _validate(
         total_loss += loss.item() * batch_n
         total_correct += (logits.argmax(dim=1) == y).sum().item()
         total_count += batch_n
+        pbar.set_postfix(loss=total_loss / total_count, acc=total_correct / total_count)
     return total_loss / max(total_count, 1), total_correct / max(total_count, 1)
 
 
@@ -254,9 +263,11 @@ def train(
 
     for epoch in range(1, cfg.training.epochs + 1):
         train_loss, train_acc = _train_one_epoch(
-            model, train_loader, optimizer, criterion, device
+            model, train_loader, optimizer, criterion, device, epoch, cfg.training.epochs
         )
-        val_loss, val_acc = _validate(model, val_loader, criterion, device)
+        val_loss, val_acc = _validate(
+            model, val_loader, criterion, device, epoch, cfg.training.epochs
+        )
         lr_now = optimizer.param_groups[0]["lr"]
 
         history["train_loss"].append(train_loss)

@@ -82,7 +82,7 @@ class MLflowLogger:
     @staticmethod
     def _timestamped_name(run_name: str) -> str:
         ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        return f"{ts}_{run_name}"
+        return f"{run_name}_{ts}"
 
     def start_run(self, run_name: str) -> None:
         if not self._active:

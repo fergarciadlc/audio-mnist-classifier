@@ -149,6 +149,14 @@ train-eval: train evaluate  ## Stages 3+4
 .PHONY: run-all
 run-all: prepare features train evaluate  ## Full pipeline (docker)
 
+.PHONY: infer
+infer:  ## Stage 5: inference on audio file/folder  (docker)  CHECKPOINT=path INPUT=path [OUTPUT=preds.csv]
+	$(DOCKER_RUN) python -m pipelines.infer \
+		--checkpoint $(CHECKPOINT) \
+		--input $(INPUT) \
+		$(if $(TOPK),--top-k $(TOPK)) \
+		$(if $(OUTPUT),--output $(OUTPUT))
+
 # ============================================================
 # Pipeline — Local (Mac, MPS)
 # ============================================================
@@ -176,3 +184,11 @@ evaluate-local:  ## Stage 4 on host
 
 .PHONY: run-all-local
 run-all-local: prepare-local features-local train-local evaluate-local  ## Full pipeline on host
+
+.PHONY: infer-local
+infer-local:  ## Stage 5 on host  CHECKPOINT=path INPUT=path [OUTPUT=preds.csv]
+	MLFLOW_TRACKING_URI=$(LOCAL_TRACKING_URI) $(PY) -m pipelines.infer \
+		--checkpoint $(CHECKPOINT) \
+		--input $(INPUT) \
+		$(if $(TOPK),--top-k $(TOPK)) \
+		$(if $(OUTPUT),--output $(OUTPUT))

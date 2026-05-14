@@ -315,6 +315,11 @@ def load_experiment(config_path: str | Path) -> ExperimentConfig:
     project_root = _find_project_root(config_path.parent)
     raw = _load_yaml(config_path)
 
+    # Snapshot files (written by training) inline dataset/features/model
+    # instead of referencing paths. Detect and dispatch.
+    if isinstance(raw.get("dataset"), dict) and "name" in raw["dataset"]:
+        return _build_experiment_from_inline(raw)
+
     exp = raw["experiment"]
     dataset_cfg = _parse_dataset(_load_yaml(_resolve_path(raw["dataset"], project_root)))
     features_cfg = _parse_features(_load_yaml(_resolve_path(raw["features"], project_root)))
@@ -345,6 +350,43 @@ def load_experiment(config_path: str | Path) -> ExperimentConfig:
         description=exp.get("description", ""),
         mlflow_experiment_name=exp.get("mlflow_experiment", ""),
         tags=exp.get("tags") or {},
+        dataset=dataset_cfg,
+        features=features_cfg,
+        model=model_cfg,
+        training=training,
+        evaluation=eval_cfg,
+    )
+
+
+def _build_experiment_from_inline(raw: dict) -> ExperimentConfig:
+    """Build an ExperimentConfig from a training-time snapshot (flat YAML).
+
+    Snapshots inline `dataset`/`features`/`model` blocks (see trainer's
+    `_save_config_snapshot`), so there are no referenced paths to resolve.
+    """
+    dataset_cfg = _parse_dataset({"dataset": raw["dataset"]})
+    features_cfg = _parse_features({"features": raw["features"]})
+    model_cfg = _parse_model({"model": raw["model"]})
+
+    training = TrainingConfig(
+        epochs=int(raw["training"]["epochs"]),
+        batch_size=int(raw["training"]["batch_size"]),
+        learning_rate=float(raw["training"]["learning_rate"]),
+        optimizer=raw["training"].get("optimizer", "adam"),
+        seed=int(raw["training"].get("seed", 42)),
+        num_workers=int(raw["training"].get("num_workers", 4)),
+        callbacks=raw["training"].get("callbacks", {}) or {},
+    )
+    eval_cfg = EvaluationConfig(
+        metrics=list(raw.get("evaluation", {}).get("metrics", [])),
+        plots=list(raw.get("evaluation", {}).get("plots", [])),
+    )
+
+    return ExperimentConfig(
+        name=raw["name"],
+        description=raw.get("description", ""),
+        mlflow_experiment_name=raw.get("mlflow_experiment", ""),
+        tags=raw.get("tags") or {},
         dataset=dataset_cfg,
         features=features_cfg,
         model=model_cfg,

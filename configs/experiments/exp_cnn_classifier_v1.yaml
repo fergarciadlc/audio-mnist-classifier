@@ -1,7 +1,7 @@
 experiment:
   name: cnn_classifier_v1
   description: "Spectrogram CNN baseline on AudioMNIST — 10-class digit classification"
-  mlflow_experiment: audio-mnist-baselines
+  mlflow_experiment: audio-mnist
   tags:
     task: multiclass_classification
     strategy: from_scratch
