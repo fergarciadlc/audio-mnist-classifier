@@ -4,6 +4,8 @@ MLOps pipeline for 10-class spoken-digit classification on **AudioMNIST**
 (30,000 WAVs, 60 speakers). Spectrogram CNN in PyTorch, MLflow for tracking,
 docker for the Linux server, pixi for the local Mac (MPS) dev env.
 
+**Live demo:** 🎤 [Try it on Hugging Face Spaces](https://huggingface.co/spaces/fergarciadlc/audio-mnist-demo) | 🤖 [Model on the Hub](https://huggingface.co/fergarciadlc/audio-mnist-cnn)
+
 Pipeline stages (each is a CLI under `pipelines/`):
 
 1. **prepare**  — scan dataset → speaker-disjoint split → `data/manifests/*.json`
